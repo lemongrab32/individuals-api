@@ -1,1 +1,40 @@
+networks:
+  iot-network:
+
 services:
+
+  individuals-api:
+    container_name: individuals-api
+    build: .
+    restart: unless-stopped
+    env_file:
+      - path: ./default.env
+        required: true
+    ports:
+      - ${INDIVIDUALS_API_PORT}:8082
+    networks:
+      - iot-network
+    depends_on:
+      keycloak:
+        condition: service_healthy
+
+  keycloak:
+    image: keycloak/keycloak:26.4
+    container_name: keycloak
+    hostname: keycloak
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl --head -fsS http://localhost:9000/health/ready | echo $?"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    env_file:
+      - path: ./default.env
+        required: true
+    ports:
+      - ${KEYCLOAK_PORT}:8080
+    volumes:
+      - ./keycloak/realm-export3.json:/opt/keycloak/data/import/realm-export3.json
+    networks:
+      - iot-network
