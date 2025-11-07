@@ -21,8 +21,9 @@ services:
   keycloak:
     image: keycloak/keycloak:26.4
     container_name: keycloak
-    hostname: keycloak
     restart: unless-stopped
+    command:
+      - start-dev
     healthcheck:
       test: ["CMD-SHELL", "curl --head -fsS http://localhost:9000/health/ready | echo $?"]
       interval: 30s
@@ -32,9 +33,27 @@ services:
     env_file:
       - path: ./default.env
         required: true
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - ${KEYCLOAK_PORT}:8080
-    volumes:
-      - ./keycloak/realm-export3.json:/opt/keycloak/data/import/realm-export3.json
+    networks:
+      - iot-network
+
+  postgres:
+    image: postgres:18-trixie
+    container_name: postgres
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    env_file:
+      - path: ./default.env
+        required: true
+    ports:
+      - ${POSTGRES_PORT}:5432
     networks:
       - iot-network

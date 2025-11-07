@@ -1,0 +1,30 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          gateway:
+            provider: keycloak
+            client-id: ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}
+            client-name: Individuals API
+            authorization-grant-type: authorization_code
+            scope: openid, profile, email
+        provider:
+          keycloak:
+            issuer-uri: ${KEYCLOAK_ISSUER_URI}
+            token-uri: ${KEYCLOAK_TOKEN_URI}
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI}
+
+keycloak:
+  host: ${KEYCLOAK_HOST}
+  realm: ${KEYCLOAK_REALM}
+  issuer-uri: ${KEYCLOAK_ISSUER_URI}
+  token-uri: ${KEYCLOAK_TOKEN_URI}
+  admin:
+    username: ${KC_BOOTSTRAP_ADMIN_USERNAME}
+    password: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+  admin-url:
+    users: ${KEYCLOAK_USERS}
